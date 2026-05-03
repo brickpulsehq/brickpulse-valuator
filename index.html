@@ -47,7 +47,6 @@
 
   html, body { background: var(--bg); color: var(--text); font-family: 'Syne', system-ui, sans-serif; min-height: 100vh; }
 
-  /* iOS safe-area handling for standalone PWA */
   body {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -55,7 +54,6 @@
     padding-right: env(safe-area-inset-right);
     -webkit-tap-highlight-color: transparent;
   }
-  /* Prevent iOS auto-zoom on input focus — input font-size set to 16px below */
 
   /* HEADER */
   .header {
@@ -69,8 +67,7 @@
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-icon {
     width: 36px; height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
+    background: var(--accent); border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; color: #1a1a1a; font-weight: 800;
     transform: rotate(-4deg);
@@ -101,26 +98,31 @@
     padding: 1.25rem 1.75rem;
     border-bottom: 1px solid var(--border);
   }
-  .mode-group { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
-  .mode-btn {
+  .mode-group, .model-group { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
+  .mode-btn, .model-btn {
     background: transparent; color: var(--muted);
     border: none; padding: 7px 14px; border-radius: 7px;
     font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.5px;
     cursor: pointer; transition: all 0.15s ease;
   }
-  .mode-btn:hover { color: var(--text); }
+  .mode-btn:hover, .model-btn:hover { color: var(--text); }
   .mode-btn.active { background: var(--accent); color: #1a1a1a; font-weight: 500; }
-
-  .model-group { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
-  .model-btn { background: transparent; color: var(--muted); border: none; padding: 7px 12px; border-radius: 7px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; }
   .model-btn.active { background: var(--blue); color: #fff; }
 
+  .rule-wrap { display: flex; align-items: center; gap: 8px; }
+  .rule-wrap label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+  #rule-pct {
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px;
+    padding: 7px 8px; width: 60px; text-align: center; outline: none;
+  }
+  #rule-pct:focus { border-color: var(--accent); }
+
   .btn {
-    background: var(--accent); color: #1a1a1a;
-    border: none; padding: 9px 20px; border-radius: var(--radius);
+    background: var(--accent); color: #1a1a1a; border: none;
+    padding: 9px 20px; border-radius: var(--radius);
     font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.15s ease;
-    letter-spacing: 0.3px;
+    cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.3px;
   }
   .btn:hover { background: #ffd456; transform: translateY(-1px); }
   .btn:disabled { background: var(--surface3); color: var(--muted); cursor: not-allowed; transform: none; }
@@ -132,79 +134,136 @@
     margin: 1.25rem 1.75rem;
     border: 2px dashed var(--border2);
     border-radius: var(--radius-lg);
-    padding: 2.5rem;
+    padding: 2rem;
     text-align: center;
     transition: all 0.2s ease;
     cursor: pointer;
     background: var(--surface);
   }
   .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(245,200,66,0.04); }
-  .upload-zone h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-  .upload-zone p { font-size: 13px; color: var(--muted); }
-  #file-input { display: none; }
+  .upload-zone h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .upload-zone p { font-size: 12.5px; color: var(--muted); }
+  .upload-zone .hint { font-family: 'DM Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 8px; letter-spacing: 0.4px; }
+  #file-input, .photo-add-input { display: none; }
 
-  /* THUMBNAIL STRIP */
-  .thumbs { display: flex; gap: 10px; padding: 0 1.75rem 1rem; flex-wrap: wrap; }
-  .thumb {
-    position: relative; width: 90px; height: 90px;
-    border-radius: var(--radius); overflow: hidden;
-    border: 1px solid var(--border2);
+  /* ADD-LOT BUTTON */
+  .add-lot-row { padding: 0 1.75rem 1.5rem; }
+  .add-lot-btn {
+    display: block; width: 100%; padding: 0.85rem;
+    background: transparent; color: var(--muted);
+    border: 1.5px dashed var(--border2); border-radius: var(--radius-lg);
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.15s ease;
   }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .thumb .status-dot {
-    position: absolute; top: 6px; right: 6px;
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--muted);
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  }
-  .thumb.pending .status-dot { background: var(--muted); }
-  .thumb.processing .status-dot { background: var(--blue); animation: pulse 1.2s infinite; }
-  .thumb.done .status-dot { background: var(--green); }
-  .thumb.error .status-dot { background: var(--red); }
-  .thumb .remove {
-    position: absolute; top: 4px; left: 4px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: rgba(0,0,0,0.65); color: #fff; border: none;
-    font-size: 12px; line-height: 1; cursor: pointer; display: none;
-  }
-  .thumb:hover .remove { display: block; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .add-lot-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* SUMMARY BAR */
-  .summary-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin: 0 1.75rem 1.5rem;
-    overflow: hidden;
-  }
-  .stat { background: var(--surface); padding: 1.1rem 1.25rem; }
-  .s-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .s-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-  .s-val.accent { color: var(--accent); }
+  /* LOT CARDS */
+  .lots-area { padding: 0 1.75rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
 
-  /* RESULTS */
-  .results { padding: 0 1.75rem 3rem; display: flex; flex-direction: column; gap: 1rem; }
   .lot-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
   }
-  .lot-header {
-    display: flex; align-items: center; gap: 14px;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
+  .lot-card.processing { border-color: rgba(91,156,246,0.4); }
+  .lot-card.done { border-color: rgba(94,203,138,0.3); }
+  .lot-card.error { border-color: rgba(232,96,74,0.4); }
+
+  .lot-top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.85rem 1.1rem;
     border-bottom: 1px solid var(--border);
   }
-  .lot-header.collapsed { border-bottom: none; }
-  .lot-header img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border2); }
-  .lot-title { flex: 1; }
-  .lot-title h3 { font-size: 14px; font-weight: 600; }
-  .lot-title .meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .lot-num {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .lot-status-pill {
+    font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 20px;
+    background: var(--surface2); color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .lot-status-pill.processing { background: rgba(91,156,246,0.15); color: var(--blue); }
+  .lot-status-pill.done { background: rgba(94,203,138,0.15); color: var(--green); }
+  .lot-status-pill.error { background: rgba(232,96,74,0.15); color: var(--red); }
+  .lot-top .spacer { flex: 1; }
+  .lot-delete {
+    background: transparent; border: none; color: var(--muted);
+    width: 28px; height: 28px; border-radius: 6px;
+    cursor: pointer; font-size: 16px; line-height: 1;
+    transition: all 0.15s ease;
+  }
+  .lot-delete:hover { background: rgba(232,96,74,0.15); color: var(--red); }
+
+  .photos-strip {
+    display: flex; gap: 8px; padding: 0.85rem 1.1rem;
+    flex-wrap: wrap;
+    background: var(--surface);
+  }
+  .photo-thumb {
+    position: relative; width: 72px; height: 72px;
+    border-radius: 8px; overflow: hidden; border: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-thumb .remove {
+    position: absolute; top: 3px; right: 3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,0.7); color: #fff; border: none;
+    font-size: 11px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-thumb .remove:hover { background: var(--red); }
+  .add-photo-btn {
+    width: 72px; height: 72px;
+    border-radius: 8px;
+    border: 1.5px dashed var(--border2);
+    background: transparent;
+    color: var(--muted); font-size: 22px; cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .add-photo-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* FINANCIALS BAR */
+  .financials {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 0.85rem 1.1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .fin-field { display: flex; align-items: center; gap: 6px; }
+  .fin-field label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.8px; text-transform: uppercase; }
+  .fin-input-wrap { position: relative; }
+  .fin-input-wrap::before {
+    content: '$'; position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); pointer-events: none;
+  }
+  .fin-input {
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 7px;
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 16px;
+    padding: 6px 8px 6px 18px; width: 90px; outline: none;
+  }
+  .fin-input:focus { border-color: var(--accent); }
+  .fin-allin {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace; font-size: 13px;
+    color: var(--text);
+  }
+  .fin-allin .label { color: var(--muted); font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; margin-right: 6px; }
+  .fin-allin .val { color: var(--accent); font-weight: 500; }
+
+  /* RESULT SECTION */
+  .result-summary {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 0.85rem 1.1rem;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    background: var(--surface);
+  }
+  .result-title { flex: 1; min-width: 200px; }
+  .result-title h3 { font-size: 14px; font-weight: 600; }
+  .result-title .meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .result-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); }
   .rec-badge {
     padding: 5px 12px; border-radius: 20px;
     font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
@@ -213,15 +272,21 @@
   .rec-buy { background: rgba(94,203,138,0.15); color: var(--green); border: 1px solid rgba(94,203,138,0.3); }
   .rec-pass { background: rgba(232,96,74,0.15); color: var(--red); border: 1px solid rgba(232,96,74,0.3); }
   .rec-depends { background: rgba(91,156,246,0.15); color: var(--blue); border: 1px solid rgba(91,156,246,0.3); }
-  .lot-total { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); }
-  .chevron { color: var(--muted); transition: transform 0.2s; }
+  .rule-badge {
+    padding: 4px 10px; border-radius: 6px;
+    font-family: 'DM Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.4px;
+  }
+  .rule-pass { background: rgba(94,203,138,0.1); color: var(--green); border: 1px solid rgba(94,203,138,0.25); }
+  .rule-fail { background: rgba(232,96,74,0.1); color: var(--red); border: 1px solid rgba(232,96,74,0.25); }
+  .chevron { color: var(--muted); transition: transform 0.2s; font-size: 12px; }
   .collapsed .chevron { transform: rotate(-90deg); }
 
-  .lot-body { padding: 1.25rem; }
-  .lot-body.hidden { display: none; }
+  .result-body { padding: 1.1rem; border-top: 1px solid var(--border); background: var(--surface); }
+  .result-body.hidden { display: none; }
 
-  .figs-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-  .figs-table th, .figs-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .figs-table { width: 100%; border-collapse: collapse; margin-bottom: 0.9rem; }
+  .figs-table th, .figs-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
   .figs-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
   .figs-table td { font-family: 'DM Mono', monospace; }
   .tier-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
@@ -236,22 +301,48 @@
     border-radius: 0 8px 8px 0;
     font-size: 12.5px;
     line-height: 1.55;
-    color: var(--text);
   }
   .rationale strong { color: var(--accent); }
 
-  /* EMPTY / ERROR */
-  .empty { text-align: center; padding: 3rem 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; }
-  .error-msg { background: rgba(232,96,74,0.1); border: 1px solid rgba(232,96,74,0.3); color: var(--red); padding: 0.85rem 1rem; border-radius: 8px; margin: 0 1.75rem 1.25rem; font-family: 'DM Mono', monospace; font-size: 12px; }
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin: 0 1.75rem 1.5rem;
+    overflow: hidden;
+  }
+  .stat { background: var(--surface); padding: 1.05rem 1.2rem; }
+  .s-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .s-val { font-size: 21px; font-weight: 700; letter-spacing: -0.5px; }
+  .s-val.accent { color: var(--accent); }
+  .s-val.green { color: var(--green); }
+  .s-val.red { color: var(--red); }
+
+  /* MISC */
+  .empty {
+    text-align: center; padding: 2.5rem 2rem; color: var(--muted);
+    font-family: 'DM Mono', monospace; font-size: 12px;
+  }
+  .error-msg {
+    background: rgba(232,96,74,0.1); border: 1px solid rgba(232,96,74,0.3); color: var(--red);
+    padding: 0.85rem 1rem; border-radius: 8px; margin: 0 1.75rem 1.25rem;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+  }
 
   /* RESPONSIVE */
   @media (max-width: 760px) {
-    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 1rem; }
     .header-right { width: 100%; }
     #api-key { width: 100%; }
-    .controls { padding: 1rem; }
-    .upload-zone, .summary-bar, .results { margin-left: 1rem; margin-right: 1rem; }
-    .results { padding-left: 1rem; padding-right: 1rem; }
+    .controls, .upload-zone, .summary-bar, .lots-area, .add-lot-row { padding-left: 1rem; padding-right: 1rem; }
+    .upload-zone, .summary-bar { margin-left: 1rem; margin-right: 1rem; }
+    .financials { gap: 10px; }
+    .fin-input { width: 80px; }
+    .fin-allin { margin-left: 0; width: 100%; padding-top: 4px; }
   }
 </style>
 </head>
@@ -284,6 +375,10 @@
     <button class="model-btn active" data-model="claude-opus-4-7">OPUS 4.7</button>
     <button class="model-btn" data-model="claude-sonnet-4-6">SONNET 4.6</button>
   </div>
+  <div class="rule-wrap">
+    <label for="rule-pct">RULE %</label>
+    <input type="number" id="rule-pct" value="50" min="10" max="100" step="5" />
+  </div>
   <button class="btn" id="analyze-btn" disabled>Analyze lots</button>
   <button class="btn btn-ghost" id="clear-btn">Clear</button>
   <button class="btn btn-ghost" id="export-btn" disabled>Export JSON</button>
@@ -293,25 +388,29 @@
 <div id="error-area"></div>
 
 <div class="upload-zone" id="upload-zone">
-  <h3>Drop lot photos here</h3>
-  <p>or click to select — multiple images supported</p>
+  <h3>Drop photos to create a new lot</h3>
+  <p>Multiple photos in one drop = same lot. Drop one at a time = separate lots.</p>
+  <div class="hint">USE “+ ADD PHOTO” ON A LOT CARD TO ATTACH MORE VIEWS TO IT.</div>
   <input type="file" id="file-input" accept="image/*" multiple />
 </div>
 
-<div class="thumbs" id="thumbs"></div>
-
 <div id="summary-area"></div>
 
-<div class="results" id="results">
-  <div class="empty">No lots analyzed yet. Upload images and hit Analyze.</div>
+<div class="lots-area" id="lots-area">
+  <div class="empty">No lots yet. Drop photos above to create your first lot.</div>
+</div>
+
+<div class="add-lot-row">
+  <button class="add-lot-btn" id="add-lot-btn">+ Add empty lot</button>
 </div>
 
 <script>
 // ---------- STATE ----------
 const state = {
-  files: [],          // { id, file, dataUrl, status, result }
+  lots: [],   // { id, photos: [{ id, file, dataUrl }], cost, shipping, status, result }
   mode: 'standard',
   model: 'claude-opus-4-7',
+  rulePct: 50,
   apiKey: localStorage.getItem('bp_api_key') || ''
 };
 
@@ -321,14 +420,15 @@ const apiKeyInput = $('api-key');
 const keySaved = $('key-saved');
 const uploadZone = $('upload-zone');
 const fileInput = $('file-input');
-const thumbsEl = $('thumbs');
+const lotsArea = $('lots-area');
+const summaryEl = $('summary-area');
 const analyzeBtn = $('analyze-btn');
 const clearBtn = $('clear-btn');
 const exportBtn = $('export-btn');
 const exportCsvBtn = $('export-csv-btn');
-const resultsEl = $('results');
-const summaryEl = $('summary-area');
+const addLotBtn = $('add-lot-btn');
 const errorArea = $('error-area');
+const rulePctInput = $('rule-pct');
 
 // ---------- API KEY ----------
 apiKeyInput.value = state.apiKey;
@@ -340,79 +440,265 @@ apiKeyInput.addEventListener('input', () => {
   updateAnalyzeBtn();
 });
 
-// ---------- MODE / MODEL ----------
+// ---------- MODE / MODEL / RULE ----------
 document.querySelectorAll('#mode-group .mode-btn').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('#mode-group .mode-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    state.mode = b.dataset.mode;
+    b.classList.add('active'); state.mode = b.dataset.mode;
   });
 });
 document.querySelectorAll('#model-group .model-btn').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('#model-group .model-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    state.model = b.dataset.model;
+    b.classList.add('active'); state.model = b.dataset.model;
   });
 });
+rulePctInput.value = localStorage.getItem('bp_rule_pct') || '50';
+state.rulePct = parseInt(rulePctInput.value) || 50;
+rulePctInput.addEventListener('change', () => {
+  state.rulePct = Math.max(10, Math.min(100, parseInt(rulePctInput.value) || 50));
+  rulePctInput.value = state.rulePct;
+  localStorage.setItem('bp_rule_pct', String(state.rulePct));
+  renderLots();
+  renderSummary();
+});
+
+// ---------- HELPERS ----------
+const newId = (p='id') => p + '_' + Math.random().toString(36).slice(2, 9);
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed: ' + file.name));
+    r.readAsDataURL(file);
+  });
+}
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 // ---------- UPLOAD ----------
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('dragover');
-  handleFiles(e.dataTransfer.files);
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  handleNewLotFiles(e.dataTransfer.files);
 });
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
+fileInput.addEventListener('change', e => {
+  handleNewLotFiles(e.target.files);
+  fileInput.value = '';
+});
 
-function handleFiles(fileList) {
+async function handleNewLotFiles(fileList) {
   const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-  arr.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const id = 'f_' + Math.random().toString(36).slice(2, 9);
-      state.files.push({ id, file, dataUrl: reader.result, status: 'pending', result: null });
-      renderThumbs();
-      updateAnalyzeBtn();
-    };
-    reader.readAsDataURL(file);
+  if (arr.length === 0) return;
+  const photos = await Promise.all(arr.map(async f => ({
+    id: newId('p'), file: f, dataUrl: await readImageFile(f)
+  })));
+  state.lots.push({
+    id: newId('lot'),
+    photos,
+    cost: 0,
+    shipping: 0,
+    status: 'pending',
+    result: null
   });
+  renderLots(); updateAnalyzeBtn();
 }
 
-function renderThumbs() {
-  thumbsEl.innerHTML = state.files.map(f => `
-    <div class="thumb ${f.status}" data-id="${f.id}">
-      <img src="${f.dataUrl}" />
-      <div class="status-dot"></div>
-      <button class="remove" data-id="${f.id}">×</button>
-    </div>
-  `).join('');
-  thumbsEl.querySelectorAll('.remove').forEach(btn => {
+addLotBtn.addEventListener('click', () => {
+  state.lots.push({ id: newId('lot'), photos: [], cost: 0, shipping: 0, status: 'pending', result: null });
+  renderLots(); updateAnalyzeBtn();
+});
+
+async function addPhotosToLot(lotId, fileList) {
+  const lot = state.lots.find(l => l.id === lotId);
+  if (!lot) return;
+  const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (arr.length === 0) return;
+  const newPhotos = await Promise.all(arr.map(async f => ({
+    id: newId('p'), file: f, dataUrl: await readImageFile(f)
+  })));
+  lot.photos.push(...newPhotos);
+  if (lot.status === 'done' || lot.status === 'error') {
+    lot.status = 'pending'; lot.result = null;
+  }
+  renderLots(); updateAnalyzeBtn();
+}
+
+// ---------- RENDER LOTS ----------
+function renderLots() {
+  if (state.lots.length === 0) {
+    lotsArea.innerHTML = '<div class="empty">No lots yet. Drop photos above to create your first lot.</div>';
+    return;
+  }
+  lotsArea.innerHTML = state.lots.map((lot, idx) => renderLotCard(lot, idx)).join('');
+
+  lotsArea.querySelectorAll('[data-action="delete-lot"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      state.files = state.files.filter(f => f.id !== btn.dataset.id);
-      renderThumbs();
-      updateAnalyzeBtn();
-      renderResults();
+      const lotId = btn.dataset.lotId;
+      state.lots = state.lots.filter(l => l.id !== lotId);
+      renderLots(); renderSummary(); updateAnalyzeBtn();
+    });
+  });
+  lotsArea.querySelectorAll('[data-action="remove-photo"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const { lotId, photoId } = btn.dataset;
+      const lot = state.lots.find(l => l.id === lotId);
+      if (!lot) return;
+      lot.photos = lot.photos.filter(p => p.id !== photoId);
+      if (lot.status === 'done' || lot.status === 'error') {
+        lot.status = 'pending'; lot.result = null;
+      }
+      renderLots(); updateAnalyzeBtn();
+    });
+  });
+  lotsArea.querySelectorAll('[data-action="add-photo"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lotId = btn.dataset.lotId;
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+      input.style.display = 'none';
+      input.onchange = () => addPhotosToLot(lotId, input.files);
+      document.body.appendChild(input);
+      input.click();
+      setTimeout(() => input.remove(), 0);
+    });
+  });
+  lotsArea.querySelectorAll('.fin-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const { lotId, field } = inp.dataset;
+      const lot = state.lots.find(l => l.id === lotId);
+      if (!lot) return;
+      lot[field] = parseFloat(inp.value) || 0;
+      const allInEl = inp.closest('.financials').querySelector('.fin-allin .val');
+      if (allInEl) allInEl.textContent = '$' + (lot.cost + lot.shipping).toFixed(2);
+      renderSummary();
+    });
+  });
+  lotsArea.querySelectorAll('.result-summary').forEach(el => {
+    el.addEventListener('click', () => {
+      el.classList.toggle('collapsed');
+      const body = el.nextElementSibling;
+      if (body) body.classList.toggle('hidden');
     });
   });
 }
 
+function renderLotCard(lot, idx) {
+  const hasResult = lot.result && !lot.result.error;
+  const allIn = (lot.cost || 0) + (lot.shipping || 0);
+
+  const photosHtml = lot.photos.map(p => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" />
+      <button class="remove" data-action="remove-photo" data-lot-id="${lot.id}" data-photo-id="${p.id}" title="Remove photo">×</button>
+    </div>
+  `).join('');
+
+  const statusLabel = {
+    pending: 'pending',
+    processing: 'processing…',
+    done: 'analyzed',
+    error: 'error'
+  }[lot.status] || 'pending';
+
+  return `
+    <div class="lot-card ${lot.status}">
+      <div class="lot-top">
+        <span class="lot-num">LOT ${idx + 1}</span>
+        <span class="lot-status-pill ${lot.status}">${statusLabel}</span>
+        <span class="spacer"></span>
+        <button class="lot-delete" data-action="delete-lot" data-lot-id="${lot.id}" title="Delete lot">×</button>
+      </div>
+      <div class="photos-strip">
+        ${photosHtml}
+        <button class="add-photo-btn" data-action="add-photo" data-lot-id="${lot.id}" title="Add photo to this lot">+</button>
+      </div>
+      <div class="financials">
+        <div class="fin-field">
+          <label>COST</label>
+          <div class="fin-input-wrap">
+            <input type="number" class="fin-input" data-lot-id="${lot.id}" data-field="cost" value="${lot.cost || ''}" placeholder="0" min="0" step="0.01" />
+          </div>
+        </div>
+        <div class="fin-field">
+          <label>SHIPPING</label>
+          <div class="fin-input-wrap">
+            <input type="number" class="fin-input" data-lot-id="${lot.id}" data-field="shipping" value="${lot.shipping || ''}" placeholder="0" min="0" step="0.01" />
+          </div>
+        </div>
+        <div class="fin-allin">
+          <span class="label">ALL-IN</span>
+          <span class="val">$${allIn.toFixed(2)}</span>
+        </div>
+      </div>
+      ${hasResult ? renderResultBlock(lot, allIn) : ''}
+      ${lot.result && lot.result.error ? `<div class="result-body" style="color:var(--red);font-family:'DM Mono',monospace;font-size:12px;">Error: ${escapeHtml(lot.result.error)}</div>` : ''}
+    </div>
+  `;
+}
+
+function renderResultBlock(lot, allIn) {
+  const r = lot.result;
+  const recClass = r.recommendation === 'BUY' ? 'rec-buy' : r.recommendation === 'PASS' ? 'rec-pass' : 'rec-depends';
+  const ruleMet = allIn > 0 && r.total_low > 0 ? (allIn <= r.total_low * (state.rulePct / 100)) : null;
+  const ruleHtml = (allIn > 0 && r.total_low > 0)
+    ? `<span class="rule-badge ${ruleMet ? 'rule-pass' : 'rule-fail'}">${state.rulePct}% RULE: ${ruleMet ? '✓ MET' : '✗ ABOVE'}</span>`
+    : '';
+
+  const figRows = (r.figures || []).map(fig => `
+    <tr>
+      <td>${escapeHtml(fig.name)}</td>
+      <td><span class="tier-badge t${(fig.tier||'T3').replace('T','')}">${fig.tier||'T3'}</span></td>
+      <td>${escapeHtml(fig.condition||'')}</td>
+      <td>$${fig.low}–$${fig.high}</td>
+      <td>${escapeHtml(fig.notes||'')}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="result-summary">
+      <div class="result-title">
+        <h3>${escapeHtml(r.title || 'Untitled lot')}</h3>
+        <div class="meta">${(r.figures||[]).length} figures · ${lot.photos.length} photo${lot.photos.length===1?'':'s'}</div>
+      </div>
+      <div class="result-value">$${r.total_low}–$${r.total_high}</div>
+      ${ruleHtml}
+      <div class="rec-badge ${recClass}">${r.recommendation || '?'}</div>
+      <div class="chevron">▼</div>
+    </div>
+    <div class="result-body">
+      ${figRows ? `<table class="figs-table">
+        <thead><tr><th>Figure</th><th>Tier</th><th>Cond.</th><th>Value</th><th>Notes</th></tr></thead>
+        <tbody>${figRows}</tbody>
+      </table>` : ''}
+      ${r.accessories_value && (r.accessories_value.low || r.accessories_value.high) ? `
+        <div style="margin-bottom:0.85rem;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">
+          Accessories: $${r.accessories_value.low}–$${r.accessories_value.high}${r.accessories_value.notes ? ' · ' + escapeHtml(r.accessories_value.notes) : ''}
+        </div>
+      ` : ''}
+      <div class="rationale"><strong>${r.recommendation}</strong> — ${escapeHtml(r.rationale || '')}</div>
+    </div>
+  `;
+}
+
 function updateAnalyzeBtn() {
-  analyzeBtn.disabled = !(state.apiKey && state.files.length > 0);
+  const hasAnalyzable = state.lots.some(l => l.photos.length > 0 && l.status !== 'done');
+  analyzeBtn.disabled = !(state.apiKey && hasAnalyzable);
 }
 
 // ---------- CLEAR ----------
 clearBtn.addEventListener('click', () => {
-  state.files = [];
-  renderThumbs();
-  renderResults();
-  summaryEl.innerHTML = '';
-  updateAnalyzeBtn();
-  exportBtn.disabled = true;
-  exportCsvBtn.disabled = true;
+  if (state.lots.length > 0 && !confirm('Clear all lots?')) return;
+  state.lots = [];
+  renderLots(); renderSummary(); updateAnalyzeBtn();
+  exportBtn.disabled = true; exportCsvBtn.disabled = true;
   errorArea.innerHTML = '';
 });
 
@@ -420,27 +706,24 @@ clearBtn.addEventListener('click', () => {
 analyzeBtn.addEventListener('click', async () => {
   errorArea.innerHTML = '';
   analyzeBtn.disabled = true;
-  for (const f of state.files) {
-    if (f.status === 'done') continue;
-    f.status = 'processing';
-    renderThumbs();
+  for (const lot of state.lots) {
+    if (lot.status === 'done' || lot.photos.length === 0) continue;
+    lot.status = 'processing';
+    renderLots();
     try {
-      const result = await analyzeLot(f);
-      f.result = result;
-      f.status = 'done';
+      const result = await analyzeLot(lot);
+      lot.result = result;
+      lot.status = result.error ? 'error' : 'done';
     } catch (err) {
-      f.status = 'error';
-      f.result = { error: err.message };
-      showError(`Image ${state.files.indexOf(f)+1}: ${err.message}`);
+      lot.status = 'error';
+      lot.result = { error: err.message };
+      showError(`Lot ${state.lots.indexOf(lot) + 1}: ${err.message}`);
     }
-    renderThumbs();
-    renderResults();
-    renderSummary();
+    renderLots(); renderSummary();
   }
   updateAnalyzeBtn();
-  if (state.files.some(f => f.status === 'done')) {
-    exportBtn.disabled = false;
-    exportCsvBtn.disabled = false;
+  if (state.lots.some(l => l.status === 'done')) {
+    exportBtn.disabled = false; exportCsvBtn.disabled = false;
   }
 });
 
@@ -452,22 +735,20 @@ function showError(msg) {
 }
 
 // ---------- API CALL ----------
-async function analyzeLot(fileObj) {
-  const base64 = fileObj.dataUrl.split(',')[1];
-  const mediaType = fileObj.file.type;
-
-  const prompt = buildPrompt(state.mode);
+async function analyzeLot(lot) {
+  const content = [];
+  lot.photos.forEach(p => {
+    content.push({
+      type: 'image',
+      source: { type: 'base64', media_type: p.file.type, data: p.dataUrl.split(',')[1] }
+    });
+  });
+  content.push({ type: 'text', text: buildPrompt(state.mode, lot) });
 
   const body = {
     model: state.model,
     max_tokens: 4000,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: prompt }
-      ]
-    }]
+    messages: [{ role: 'user', content }]
   };
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -491,24 +772,38 @@ async function analyzeLot(fileObj) {
   return parseResponse(text);
 }
 
-function buildPrompt(mode) {
+function buildPrompt(mode, lot) {
   const depth = {
     standard: 'Identify every visible LEGO minifigure with normal thoroughness.',
     deep: 'Be exhaustive. Look carefully at piles, edges, partial figures. Identify every figure even if partially obscured.',
     quick: 'Quick scan only. Estimate totals without per-figure detail.'
   }[mode];
 
-  return `You are a LEGO minifigure resale appraiser. Analyze this lot photo and return ONLY a valid JSON object (no markdown, no code fences, no preamble).
+  const photoCount = lot.photos.length;
+  const multiPhotoNote = photoCount > 1
+    ? `\nIMPORTANT: There are ${photoCount} photos provided — these are MULTIPLE VIEWS OF THE SAME LOT (different angles, close-ups, back/front). Do NOT count the same figure more than once across photos. Use all views together to identify each unique figure with maximum confidence.\n`
+    : '';
 
-${depth}
+  const allIn = (lot.cost || 0) + (lot.shipping || 0);
+  const costNote = allIn > 0
+    ? `\nBUYER COST CONTEXT:
+- Item cost: $${(lot.cost || 0).toFixed(2)}
+- Shipping/delivery: $${(lot.shipping || 0).toFixed(2)}
+- ALL-IN COST: $${allIn.toFixed(2)}
 
+Apply the ${state.rulePct}% rule strictly: a clear BUY requires the all-in cost (item + shipping) to be ≤ ${state.rulePct}% of the LOW estimate. If above this threshold, recommend PASS or DEPENDS based on margin and authenticity confidence. State the actual margin in the rationale.\n`
+    : `\nNo cost provided by the buyer. Recommend based on figure quality and tier mix only — assume a reasonable buyer would apply a ${state.rulePct}% rule (cost ≤ ${state.rulePct}% of low estimate).\n`;
+
+  return `You are a LEGO minifigure resale appraiser. Analyze this lot and return ONLY a valid JSON object (no markdown, no code fences, no preamble).
+
+${depth}${multiPhotoNote}
 For each minifigure identified, classify into a tier:
 - T1 (Tier 1): Premium licensed - Star Wars, Marvel, Harry Potter, DC, Lord of the Rings, Indiana Jones, rare CMF, exclusives ($15+ avg)
-- T2 (Tier 2): Mid-tier - City specialty, Ninjago, Castle, Pirates, common CMF ($5-15 avg)
+- T2 (Tier 2): Mid-tier - City specialty, Ninjago, Castle, Pirates, common CMF ($5–15 avg)
 - T3 (Tier 3): Common - generic City, Friends, basic figures (under $5)
 
 Use BrickLink 6-month average sold (used) as the value baseline. Account for: missing accessories, fading, damage, completeness.
-
+${costNote}
 Return JSON in this exact shape:
 {
   "title": "short lot description",
@@ -519,109 +814,48 @@ Return JSON in this exact shape:
   "total_low": 0,
   "total_high": 0,
   "recommendation": "BUY|PASS|DEPENDS",
-  "rationale": "1-3 sentence rationale referencing the 50% rule (cost should be ≤50% of low estimate to be a clear buy). Note any authenticity flags."
+  "rationale": "1-3 sentences. Reference the actual all-in cost vs the ${state.rulePct}% rule threshold if cost was provided. Note any authenticity flags."
 }
 
 Be honest. Flag suspected bootlegs explicitly in notes. If you cannot identify a figure with confidence, say so in notes and price conservatively.`;
 }
 
 function parseResponse(text) {
-  // Strip code fences if present
   let cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
-  // Sometimes models add preamble — try to find first { and last }
   const first = cleaned.indexOf('{');
   const last = cleaned.lastIndexOf('}');
   if (first >= 0 && last > first) cleaned = cleaned.slice(first, last + 1);
-  try {
-    return JSON.parse(cleaned);
-  } catch (e) {
-    return { error: 'Parse failed', raw: text };
-  }
-}
-
-// ---------- RENDER RESULTS ----------
-function renderResults() {
-  if (state.files.length === 0) {
-    resultsEl.innerHTML = '<div class="empty">No lots analyzed yet. Upload images and hit Analyze.</div>';
-    return;
-  }
-  resultsEl.innerHTML = state.files.map((f, idx) => renderLotCard(f, idx)).join('');
-  // Wire up collapse toggles
-  resultsEl.querySelectorAll('.lot-header').forEach(h => {
-    h.addEventListener('click', () => {
-      h.classList.toggle('collapsed');
-      h.nextElementSibling.classList.toggle('hidden');
-    });
-  });
-}
-
-function renderLotCard(f, idx) {
-  if (!f.result) {
-    return `<div class="lot-card"><div class="lot-header"><img src="${f.dataUrl}"/><div class="lot-title"><h3>Lot ${idx+1}</h3><div class="meta">${f.status}</div></div></div></div>`;
-  }
-  if (f.result.error) {
-    return `<div class="lot-card"><div class="lot-header"><img src="${f.dataUrl}"/><div class="lot-title"><h3>Lot ${idx+1} — Error</h3><div class="meta">${f.result.error}</div></div></div></div>`;
-  }
-  const r = f.result;
-  const recClass = r.recommendation === 'BUY' ? 'rec-buy' : r.recommendation === 'PASS' ? 'rec-pass' : 'rec-depends';
-  const figRows = (r.figures || []).map(fig => `
-    <tr>
-      <td>${escapeHtml(fig.name)}</td>
-      <td><span class="tier-badge t${fig.tier?.replace('T','')||3}">${fig.tier||'T3'}</span></td>
-      <td>${escapeHtml(fig.condition||'')}</td>
-      <td>$${fig.low}–$${fig.high}</td>
-      <td>${escapeHtml(fig.notes||'')}</td>
-    </tr>
-  `).join('');
-
-  return `
-    <div class="lot-card">
-      <div class="lot-header">
-        <img src="${f.dataUrl}" />
-        <div class="lot-title">
-          <h3>Lot ${idx+1} — ${escapeHtml(r.title||'Untitled')}</h3>
-          <div class="meta">${(r.figures||[]).length} figures identified</div>
-        </div>
-        <div class="lot-total">$${r.total_low}–$${r.total_high}</div>
-        <div class="rec-badge ${recClass}">${r.recommendation||'?'}</div>
-        <div class="chevron">▼</div>
-      </div>
-      <div class="lot-body">
-        ${figRows ? `<table class="figs-table">
-          <thead><tr><th>Figure</th><th>Tier</th><th>Cond.</th><th>Value</th><th>Notes</th></tr></thead>
-          <tbody>${figRows}</tbody>
-        </table>` : ''}
-        ${r.accessories_value && (r.accessories_value.low || r.accessories_value.high) ? `
-          <div style="margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">
-            Accessories: $${r.accessories_value.low}–$${r.accessories_value.high} ${r.accessories_value.notes ? '· ' + escapeHtml(r.accessories_value.notes) : ''}
-          </div>
-        ` : ''}
-        <div class="rationale"><strong>${r.recommendation}</strong> — ${escapeHtml(r.rationale||'')}</div>
-      </div>
-    </div>
-  `;
-}
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  try { return JSON.parse(cleaned); }
+  catch (e) { return { error: 'Parse failed', raw: text }; }
 }
 
 // ---------- SUMMARY ----------
 function renderSummary() {
-  const done = state.files.filter(f => f.status === 'done' && f.result && !f.result.error);
+  const done = state.lots.filter(l => l.status === 'done' && l.result && !l.result.error);
   if (done.length === 0) { summaryEl.innerHTML = ''; return; }
 
-  let totalFigs = 0, t1 = 0, gLow = 0, gHigh = 0;
-  done.forEach(f => {
-    const r = f.result;
+  let totalFigs = 0, t1 = 0, gLow = 0, gHigh = 0, totalCost = 0, totalShip = 0;
+  done.forEach(l => {
+    const r = l.result;
     totalFigs += (r.figures||[]).length;
     t1 += (r.figures||[]).filter(x => x.tier === 'T1').length;
     gLow += r.total_low || 0;
     gHigh += r.total_high || 0;
+    totalCost += l.cost || 0;
+    totalShip += l.shipping || 0;
   });
-  const avgPer = totalFigs ? ((gLow + gHigh) / 2 / totalFigs).toFixed(2) : '—';
-  const targetCost = (gLow * 0.5).toFixed(0);
+
+  const allIn = totalCost + totalShip;
+  const marginLow = gLow - allIn;
+  const marginHigh = gHigh - allIn;
+  const ruleMax = (gLow * (state.rulePct / 100)).toFixed(0);
+  const ruleMet = allIn > 0 ? allIn <= gLow * (state.rulePct / 100) : null;
+
+  const allInHtml = allIn > 0
+    ? `<div class="stat"><div class="s-label">All-in cost</div><div class="s-val">$${allIn.toFixed(0)}</div></div>
+       <div class="stat"><div class="s-label">Margin</div><div class="s-val ${marginLow > 0 ? 'green' : 'red'}">$${marginLow.toFixed(0)}–$${marginHigh.toFixed(0)}</div></div>
+       <div class="stat"><div class="s-label">${state.rulePct}% rule</div><div class="s-val ${ruleMet ? 'green' : 'red'}">${ruleMet ? '✓ MET' : '✗ ABOVE'}</div></div>`
+    : `<div class="stat"><div class="s-label">${state.rulePct}% rule max cost</div><div class="s-val accent">$${ruleMax}</div></div>`;
 
   summaryEl.innerHTML = `
     <div class="summary-bar">
@@ -629,31 +863,43 @@ function renderSummary() {
       <div class="stat"><div class="s-label">Figures</div><div class="s-val">${totalFigs}</div></div>
       <div class="stat"><div class="s-label">Tier 1</div><div class="s-val accent">${t1}</div></div>
       <div class="stat"><div class="s-label">Gross estimate</div><div class="s-val">$${gLow}–$${gHigh}</div></div>
-      <div class="stat"><div class="s-label">Avg / fig</div><div class="s-val">$${avgPer}</div></div>
-      <div class="stat"><div class="s-label">50% rule max</div><div class="s-val accent">$${targetCost}</div></div>
+      ${allInHtml}
     </div>
   `;
 }
 
 // ---------- EXPORT ----------
 exportBtn.addEventListener('click', () => {
-  const out = state.files.filter(f => f.result && !f.result.error).map((f, i) => ({
+  const out = state.lots.filter(l => l.result && !l.result.error).map((l, i) => ({
     lot: i + 1,
-    filename: f.file.name,
-    ...f.result
+    photo_count: l.photos.length,
+    photo_filenames: l.photos.map(p => p.file.name),
+    cost: l.cost || 0,
+    shipping: l.shipping || 0,
+    all_in: (l.cost || 0) + (l.shipping || 0),
+    rule_pct: state.rulePct,
+    ...l.result
   }));
   downloadFile('brickpulse-valuator-' + Date.now() + '.json', JSON.stringify(out, null, 2), 'application/json');
 });
 
 exportCsvBtn.addEventListener('click', () => {
-  const rows = [['Lot','Title','Figure','Theme','Tier','Condition','Low','High','Notes','Lot Recommendation','Lot Rationale']];
-  state.files.forEach((f, i) => {
-    if (!f.result || f.result.error) return;
-    const r = f.result;
-    (r.figures || []).forEach(fig => {
+  const rows = [['Lot','Photos','Title','Figure','Theme','Tier','Condition','Low','High','Notes','Cost','Shipping','All-in','Lot Low','Lot High','Margin Low','Margin High','Recommendation','Rule Met','Rationale']];
+  state.lots.forEach((l, i) => {
+    if (!l.result || l.result.error) return;
+    const r = l.result;
+    const allIn = (l.cost || 0) + (l.shipping || 0);
+    const ruleMet = allIn > 0 && r.total_low > 0 ? (allIn <= r.total_low * (state.rulePct / 100)) : '';
+    const figs = r.figures && r.figures.length ? r.figures : [{ name:'(no figures parsed)', theme:'', tier:'', condition:'', low:'', high:'', notes:'' }];
+    figs.forEach(fig => {
       rows.push([
-        i+1, r.title||'', fig.name||'', fig.theme||'', fig.tier||'', fig.condition||'',
-        fig.low, fig.high, fig.notes||'', r.recommendation||'', r.rationale||''
+        i+1, l.photos.length, r.title||'', fig.name||'', fig.theme||'', fig.tier||'', fig.condition||'',
+        fig.low, fig.high, fig.notes||'',
+        l.cost||0, l.shipping||0, allIn,
+        r.total_low, r.total_high,
+        (r.total_low||0) - allIn, (r.total_high||0) - allIn,
+        r.recommendation||'', ruleMet === '' ? '' : (ruleMet ? 'YES' : 'NO'),
+        r.rationale||''
       ]);
     });
   });
