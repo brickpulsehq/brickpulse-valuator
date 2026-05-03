@@ -1,0 +1,17 @@
+{
+  "name": "BrickPulse Valuator",
+  "short_name": "Valuator",
+  "description": "LEGO minifigure lot valuator powered by Claude Vision.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e0e0f",
+  "theme_color": "#0e0e0f",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

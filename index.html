@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>BrickPulse Valuator</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0e0e0f" />
+<meta name="application-name" content="Valuator" />
+<meta name="description" content="LEGO minifigure lot valuator powered by Claude Vision." />
+
+<!-- iOS / Apple -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Valuator" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #18181b;
+    --surface2: #222226;
+    --surface3: #2a2a2f;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --muted: #888680;
+    --accent: #f5c842;
+    --accent2: #e8964a;
+    --green: #5ecb8a;
+    --red: #e8604a;
+    --blue: #5b9cf6;
+    --purple: #b48ff5;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  html, body { background: var(--bg); color: var(--text); font-family: 'Syne', system-ui, sans-serif; min-height: 100vh; }
+
+  /* iOS safe-area handling for standalone PWA */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Prevent iOS auto-zoom on input focus — input font-size set to 16px below */
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #1a1a1a; font-weight: 800;
+    transform: rotate(-4deg);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .logo-text { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; letter-spacing: 0.5px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .api-input-wrap { display: flex; align-items: center; gap: 8px; }
+  .api-input-wrap label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+  #api-key {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    padding: 7px 10px;
+    width: 280px;
+    outline: none;
+  }
+  #api-key:focus { border-color: var(--accent); }
+  .key-saved { font-size: 10px; color: var(--green); font-family: 'DM Mono', monospace; }
+
+  /* CONTROLS */
+  .controls {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .mode-group { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
+  .mode-btn {
+    background: transparent; color: var(--muted);
+    border: none; padding: 7px 14px; border-radius: 7px;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.5px;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .mode-btn:hover { color: var(--text); }
+  .mode-btn.active { background: var(--accent); color: #1a1a1a; font-weight: 500; }
+
+  .model-group { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); }
+  .model-btn { background: transparent; color: var(--muted); border: none; padding: 7px 12px; border-radius: 7px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; }
+  .model-btn.active { background: var(--blue); color: #fff; }
+
+  .btn {
+    background: var(--accent); color: #1a1a1a;
+    border: none; padding: 9px 20px; border-radius: var(--radius);
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { background: #ffd456; transform: translateY(-1px); }
+  .btn:disabled { background: var(--surface3); color: var(--muted); cursor: not-allowed; transform: none; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--surface3); }
+
+  /* UPLOAD */
+  .upload-zone {
+    margin: 1.25rem 1.75rem;
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: var(--surface);
+  }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(245,200,66,0.04); }
+  .upload-zone h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .upload-zone p { font-size: 13px; color: var(--muted); }
+  #file-input { display: none; }
+
+  /* THUMBNAIL STRIP */
+  .thumbs { display: flex; gap: 10px; padding: 0 1.75rem 1rem; flex-wrap: wrap; }
+  .thumb {
+    position: relative; width: 90px; height: 90px;
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border2);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .status-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--muted);
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
+  }
+  .thumb.pending .status-dot { background: var(--muted); }
+  .thumb.processing .status-dot { background: var(--blue); animation: pulse 1.2s infinite; }
+  .thumb.done .status-dot { background: var(--green); }
+  .thumb.error .status-dot { background: var(--red); }
+  .thumb .remove {
+    position: absolute; top: 4px; left: 4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,0.65); color: #fff; border: none;
+    font-size: 12px; line-height: 1; cursor: pointer; display: none;
+  }
+  .thumb:hover .remove { display: block; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin: 0 1.75rem 1.5rem;
+    overflow: hidden;
+  }
+  .stat { background: var(--surface); padding: 1.1rem 1.25rem; }
+  .s-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .s-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .s-val.accent { color: var(--accent); }
+
+  /* RESULTS */
+  .results { padding: 0 1.75rem 3rem; display: flex; flex-direction: column; gap: 1rem; }
+  .lot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .lot-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+  }
+  .lot-header.collapsed { border-bottom: none; }
+  .lot-header img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border2); }
+  .lot-title { flex: 1; }
+  .lot-title h3 { font-size: 14px; font-weight: 600; }
+  .lot-title .meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .rec-badge {
+    padding: 5px 12px; border-radius: 20px;
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .rec-buy { background: rgba(94,203,138,0.15); color: var(--green); border: 1px solid rgba(94,203,138,0.3); }
+  .rec-pass { background: rgba(232,96,74,0.15); color: var(--red); border: 1px solid rgba(232,96,74,0.3); }
+  .rec-depends { background: rgba(91,156,246,0.15); color: var(--blue); border: 1px solid rgba(91,156,246,0.3); }
+  .lot-total { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); }
+  .chevron { color: var(--muted); transition: transform 0.2s; }
+  .collapsed .chevron { transform: rotate(-90deg); }
+
+  .lot-body { padding: 1.25rem; }
+  .lot-body.hidden { display: none; }
+
+  .figs-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+  .figs-table th, .figs-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .figs-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+  .figs-table td { font-family: 'DM Mono', monospace; }
+  .tier-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+  .t1 { background: rgba(245,200,66,0.18); color: var(--accent); border: 1px solid rgba(245,200,66,0.35); }
+  .t2 { background: rgba(91,156,246,0.18); color: var(--blue); border: 1px solid rgba(91,156,246,0.35); }
+  .t3 { background: rgba(180,143,245,0.18); color: var(--purple); border: 1px solid rgba(180,143,245,0.35); }
+
+  .rationale {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 0.85rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .rationale strong { color: var(--accent); }
+
+  /* EMPTY / ERROR */
+  .empty { text-align: center; padding: 3rem 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .error-msg { background: rgba(232,96,74,0.1); border: 1px solid rgba(232,96,74,0.3); color: var(--red); padding: 0.85rem 1rem; border-radius: 8px; margin: 0 1.75rem 1.25rem; font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 760px) {
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-right { width: 100%; }
+    #api-key { width: 100%; }
+    .controls { padding: 1rem; }
+    .upload-zone, .summary-bar, .results { margin-left: 1rem; margin-right: 1rem; }
+    .results { padding-left: 1rem; padding-right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">B</div>
+    <div>
+      <div class="logo-text">BrickPulse Valuator</div>
+      <div class="logo-sub">LOCAL · CLAUDE VISION</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="api-input-wrap">
+      <label for="api-key">API KEY</label>
+      <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off" />
+      <span class="key-saved" id="key-saved"></span>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="mode-group" id="mode-group">
+    <button class="mode-btn active" data-mode="standard">STANDARD</button>
+    <button class="mode-btn" data-mode="deep">DEEP DIVE</button>
+    <button class="mode-btn" data-mode="quick">QUICK</button>
+  </div>
+  <div class="model-group" id="model-group">
+    <button class="model-btn active" data-model="claude-opus-4-7">OPUS 4.7</button>
+    <button class="model-btn" data-model="claude-sonnet-4-6">SONNET 4.6</button>
+  </div>
+  <button class="btn" id="analyze-btn" disabled>Analyze lots</button>
+  <button class="btn btn-ghost" id="clear-btn">Clear</button>
+  <button class="btn btn-ghost" id="export-btn" disabled>Export JSON</button>
+  <button class="btn btn-ghost" id="export-csv-btn" disabled>Export CSV</button>
+</div>
+
+<div id="error-area"></div>
+
+<div class="upload-zone" id="upload-zone">
+  <h3>Drop lot photos here</h3>
+  <p>or click to select — multiple images supported</p>
+  <input type="file" id="file-input" accept="image/*" multiple />
+</div>
+
+<div class="thumbs" id="thumbs"></div>
+
+<div id="summary-area"></div>
+
+<div class="results" id="results">
+  <div class="empty">No lots analyzed yet. Upload images and hit Analyze.</div>
+</div>
+
+<script>
+// ---------- STATE ----------
+const state = {
+  files: [],          // { id, file, dataUrl, status, result }
+  mode: 'standard',
+  model: 'claude-opus-4-7',
+  apiKey: localStorage.getItem('bp_api_key') || ''
+};
+
+// ---------- ELEMENTS ----------
+const $ = (id) => document.getElementById(id);
+const apiKeyInput = $('api-key');
+const keySaved = $('key-saved');
+const uploadZone = $('upload-zone');
+const fileInput = $('file-input');
+const thumbsEl = $('thumbs');
+const analyzeBtn = $('analyze-btn');
+const clearBtn = $('clear-btn');
+const exportBtn = $('export-btn');
+const exportCsvBtn = $('export-csv-btn');
+const resultsEl = $('results');
+const summaryEl = $('summary-area');
+const errorArea = $('error-area');
+
+// ---------- API KEY ----------
+apiKeyInput.value = state.apiKey;
+if (state.apiKey) keySaved.textContent = '✓ saved';
+apiKeyInput.addEventListener('input', () => {
+  state.apiKey = apiKeyInput.value.trim();
+  localStorage.setItem('bp_api_key', state.apiKey);
+  keySaved.textContent = state.apiKey ? '✓ saved' : '';
+  updateAnalyzeBtn();
+});
+
+// ---------- MODE / MODEL ----------
+document.querySelectorAll('#mode-group .mode-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#mode-group .mode-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.mode = b.dataset.mode;
+  });
+});
+document.querySelectorAll('#model-group .model-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#model-group .model-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.model = b.dataset.model;
+  });
+});
+
+// ---------- UPLOAD ----------
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(fileList) {
+  const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  arr.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const id = 'f_' + Math.random().toString(36).slice(2, 9);
+      state.files.push({ id, file, dataUrl: reader.result, status: 'pending', result: null });
+      renderThumbs();
+      updateAnalyzeBtn();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderThumbs() {
+  thumbsEl.innerHTML = state.files.map(f => `
+    <div class="thumb ${f.status}" data-id="${f.id}">
+      <img src="${f.dataUrl}" />
+      <div class="status-dot"></div>
+      <button class="remove" data-id="${f.id}">×</button>
+    </div>
+  `).join('');
+  thumbsEl.querySelectorAll('.remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.files = state.files.filter(f => f.id !== btn.dataset.id);
+      renderThumbs();
+      updateAnalyzeBtn();
+      renderResults();
+    });
+  });
+}
+
+function updateAnalyzeBtn() {
+  analyzeBtn.disabled = !(state.apiKey && state.files.length > 0);
+}
+
+// ---------- CLEAR ----------
+clearBtn.addEventListener('click', () => {
+  state.files = [];
+  renderThumbs();
+  renderResults();
+  summaryEl.innerHTML = '';
+  updateAnalyzeBtn();
+  exportBtn.disabled = true;
+  exportCsvBtn.disabled = true;
+  errorArea.innerHTML = '';
+});
+
+// ---------- ANALYZE ----------
+analyzeBtn.addEventListener('click', async () => {
+  errorArea.innerHTML = '';
+  analyzeBtn.disabled = true;
+  for (const f of state.files) {
+    if (f.status === 'done') continue;
+    f.status = 'processing';
+    renderThumbs();
+    try {
+      const result = await analyzeLot(f);
+      f.result = result;
+      f.status = 'done';
+    } catch (err) {
+      f.status = 'error';
+      f.result = { error: err.message };
+      showError(`Image ${state.files.indexOf(f)+1}: ${err.message}`);
+    }
+    renderThumbs();
+    renderResults();
+    renderSummary();
+  }
+  updateAnalyzeBtn();
+  if (state.files.some(f => f.status === 'done')) {
+    exportBtn.disabled = false;
+    exportCsvBtn.disabled = false;
+  }
+});
+
+function showError(msg) {
+  const div = document.createElement('div');
+  div.className = 'error-msg';
+  div.textContent = msg;
+  errorArea.appendChild(div);
+}
+
+// ---------- API CALL ----------
+async function analyzeLot(fileObj) {
+  const base64 = fileObj.dataUrl.split(',')[1];
+  const mediaType = fileObj.file.type;
+
+  const prompt = buildPrompt(state.mode);
+
+  const body = {
+    model: state.model,
+    max_tokens: 4000,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+        { type: 'text', text: prompt }
+      ]
+    }]
+  };
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': state.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`API ${res.status}: ${errText.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const text = data.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
+  return parseResponse(text);
+}
+
+function buildPrompt(mode) {
+  const depth = {
+    standard: 'Identify every visible LEGO minifigure with normal thoroughness.',
+    deep: 'Be exhaustive. Look carefully at piles, edges, partial figures. Identify every figure even if partially obscured.',
+    quick: 'Quick scan only. Estimate totals without per-figure detail.'
+  }[mode];
+
+  return `You are a LEGO minifigure resale appraiser. Analyze this lot photo and return ONLY a valid JSON object (no markdown, no code fences, no preamble).
+
+${depth}
+
+For each minifigure identified, classify into a tier:
+- T1 (Tier 1): Premium licensed - Star Wars, Marvel, Harry Potter, DC, Lord of the Rings, Indiana Jones, rare CMF, exclusives ($15+ avg)
+- T2 (Tier 2): Mid-tier - City specialty, Ninjago, Castle, Pirates, common CMF ($5-15 avg)
+- T3 (Tier 3): Common - generic City, Friends, basic figures (under $5)
+
+Use BrickLink 6-month average sold (used) as the value baseline. Account for: missing accessories, fading, damage, completeness.
+
+Return JSON in this exact shape:
+{
+  "title": "short lot description",
+  "figures": [
+    { "name": "Figure name + theme if known", "theme": "Theme", "tier": "T1|T2|T3", "condition": "complete|incomplete|damaged", "low": 5, "high": 12, "notes": "optional short note" }
+  ],
+  "accessories_value": { "low": 0, "high": 0, "notes": "" },
+  "total_low": 0,
+  "total_high": 0,
+  "recommendation": "BUY|PASS|DEPENDS",
+  "rationale": "1-3 sentence rationale referencing the 50% rule (cost should be ≤50% of low estimate to be a clear buy). Note any authenticity flags."
+}
+
+Be honest. Flag suspected bootlegs explicitly in notes. If you cannot identify a figure with confidence, say so in notes and price conservatively.`;
+}
+
+function parseResponse(text) {
+  // Strip code fences if present
+  let cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  // Sometimes models add preamble — try to find first { and last }
+  const first = cleaned.indexOf('{');
+  const last = cleaned.lastIndexOf('}');
+  if (first >= 0 && last > first) cleaned = cleaned.slice(first, last + 1);
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    return { error: 'Parse failed', raw: text };
+  }
+}
+
+// ---------- RENDER RESULTS ----------
+function renderResults() {
+  if (state.files.length === 0) {
+    resultsEl.innerHTML = '<div class="empty">No lots analyzed yet. Upload images and hit Analyze.</div>';
+    return;
+  }
+  resultsEl.innerHTML = state.files.map((f, idx) => renderLotCard(f, idx)).join('');
+  // Wire up collapse toggles
+  resultsEl.querySelectorAll('.lot-header').forEach(h => {
+    h.addEventListener('click', () => {
+      h.classList.toggle('collapsed');
+      h.nextElementSibling.classList.toggle('hidden');
+    });
+  });
+}
+
+function renderLotCard(f, idx) {
+  if (!f.result) {
+    return `<div class="lot-card"><div class="lot-header"><img src="${f.dataUrl}"/><div class="lot-title"><h3>Lot ${idx+1}</h3><div class="meta">${f.status}</div></div></div></div>`;
+  }
+  if (f.result.error) {
+    return `<div class="lot-card"><div class="lot-header"><img src="${f.dataUrl}"/><div class="lot-title"><h3>Lot ${idx+1} — Error</h3><div class="meta">${f.result.error}</div></div></div></div>`;
+  }
+  const r = f.result;
+  const recClass = r.recommendation === 'BUY' ? 'rec-buy' : r.recommendation === 'PASS' ? 'rec-pass' : 'rec-depends';
+  const figRows = (r.figures || []).map(fig => `
+    <tr>
+      <td>${escapeHtml(fig.name)}</td>
+      <td><span class="tier-badge t${fig.tier?.replace('T','')||3}">${fig.tier||'T3'}</span></td>
+      <td>${escapeHtml(fig.condition||'')}</td>
+      <td>$${fig.low}–$${fig.high}</td>
+      <td>${escapeHtml(fig.notes||'')}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="lot-card">
+      <div class="lot-header">
+        <img src="${f.dataUrl}" />
+        <div class="lot-title">
+          <h3>Lot ${idx+1} — ${escapeHtml(r.title||'Untitled')}</h3>
+          <div class="meta">${(r.figures||[]).length} figures identified</div>
+        </div>
+        <div class="lot-total">$${r.total_low}–$${r.total_high}</div>
+        <div class="rec-badge ${recClass}">${r.recommendation||'?'}</div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="lot-body">
+        ${figRows ? `<table class="figs-table">
+          <thead><tr><th>Figure</th><th>Tier</th><th>Cond.</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>${figRows}</tbody>
+        </table>` : ''}
+        ${r.accessories_value && (r.accessories_value.low || r.accessories_value.high) ? `
+          <div style="margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);">
+            Accessories: $${r.accessories_value.low}–$${r.accessories_value.high} ${r.accessories_value.notes ? '· ' + escapeHtml(r.accessories_value.notes) : ''}
+          </div>
+        ` : ''}
+        <div class="rationale"><strong>${r.recommendation}</strong> — ${escapeHtml(r.rationale||'')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- SUMMARY ----------
+function renderSummary() {
+  const done = state.files.filter(f => f.status === 'done' && f.result && !f.result.error);
+  if (done.length === 0) { summaryEl.innerHTML = ''; return; }
+
+  let totalFigs = 0, t1 = 0, gLow = 0, gHigh = 0;
+  done.forEach(f => {
+    const r = f.result;
+    totalFigs += (r.figures||[]).length;
+    t1 += (r.figures||[]).filter(x => x.tier === 'T1').length;
+    gLow += r.total_low || 0;
+    gHigh += r.total_high || 0;
+  });
+  const avgPer = totalFigs ? ((gLow + gHigh) / 2 / totalFigs).toFixed(2) : '—';
+  const targetCost = (gLow * 0.5).toFixed(0);
+
+  summaryEl.innerHTML = `
+    <div class="summary-bar">
+      <div class="stat"><div class="s-label">Lots</div><div class="s-val">${done.length}</div></div>
+      <div class="stat"><div class="s-label">Figures</div><div class="s-val">${totalFigs}</div></div>
+      <div class="stat"><div class="s-label">Tier 1</div><div class="s-val accent">${t1}</div></div>
+      <div class="stat"><div class="s-label">Gross estimate</div><div class="s-val">$${gLow}–$${gHigh}</div></div>
+      <div class="stat"><div class="s-label">Avg / fig</div><div class="s-val">$${avgPer}</div></div>
+      <div class="stat"><div class="s-label">50% rule max</div><div class="s-val accent">$${targetCost}</div></div>
+    </div>
+  `;
+}
+
+// ---------- EXPORT ----------
+exportBtn.addEventListener('click', () => {
+  const out = state.files.filter(f => f.result && !f.result.error).map((f, i) => ({
+    lot: i + 1,
+    filename: f.file.name,
+    ...f.result
+  }));
+  downloadFile('brickpulse-valuator-' + Date.now() + '.json', JSON.stringify(out, null, 2), 'application/json');
+});
+
+exportCsvBtn.addEventListener('click', () => {
+  const rows = [['Lot','Title','Figure','Theme','Tier','Condition','Low','High','Notes','Lot Recommendation','Lot Rationale']];
+  state.files.forEach((f, i) => {
+    if (!f.result || f.result.error) return;
+    const r = f.result;
+    (r.figures || []).forEach(fig => {
+      rows.push([
+        i+1, r.title||'', fig.name||'', fig.theme||'', fig.tier||'', fig.condition||'',
+        fig.low, fig.high, fig.notes||'', r.recommendation||'', r.rationale||''
+      ]);
+    });
+  });
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadFile('brickpulse-valuator-' + Date.now() + '.csv', csv, 'text/csv');
+});
+
+function downloadFile(name, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---------- PWA: SERVICE WORKER ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
