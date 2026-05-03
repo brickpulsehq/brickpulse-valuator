@@ -2,7 +2,7 @@
 // Caches the app shell so it loads instantly and works offline.
 // API calls to api.anthropic.com are NEVER cached — always live.
 
-const CACHE_NAME = 'brickpulse-valuator-v2';
+const CACHE_NAME = 'brickpulse-valuator-v3';
 const SHELL = [
   './',
   './index.html',

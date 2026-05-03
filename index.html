@@ -206,6 +206,12 @@
     flex-shrink: 0;
   }
   .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-thumb .resized-badge {
+    position: absolute; bottom: 3px; left: 3px;
+    background: rgba(94,203,138,0.9); color: #0a0a0a;
+    font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700;
+    padding: 1px 5px; border-radius: 3px; letter-spacing: 0.3px;
+  }
   .photo-thumb .remove {
     position: absolute; top: 3px; right: 3px;
     width: 18px; height: 18px; border-radius: 50%;
@@ -322,7 +328,84 @@
   .s-val.green { color: var(--green); }
   .s-val.red { color: var(--red); }
 
-  /* MISC */
+  /* MAX BID CALCULATOR */
+  .maxbid-card {
+    margin: 0 1.75rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .maxbid-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer; user-select: none;
+  }
+  .maxbid-title { flex: 1; display: flex; align-items: center; gap: 12px; }
+  .maxbid-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(245,200,66,0.15); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; border: 1px solid rgba(245,200,66,0.3);
+  }
+  .maxbid-name { font-size: 14px; font-weight: 700; }
+  .maxbid-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; letter-spacing: 0.3px; }
+  .maxbid-toggle {
+    background: transparent; border: none; color: var(--muted);
+    cursor: pointer; font-size: 14px; transition: transform 0.2s;
+    width: 28px; height: 28px; border-radius: 6px;
+  }
+  .maxbid-toggle:hover { background: var(--surface2); color: var(--text); }
+  .maxbid-card.collapsed .maxbid-toggle { transform: rotate(-90deg); }
+  .maxbid-body {
+    padding: 1rem 1.1rem 1.1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .maxbid-card.collapsed .maxbid-body { display: none; }
+  .maxbid-row {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 1rem;
+  }
+  .maxbid-field { display: flex; flex-direction: column; gap: 5px; }
+  .maxbid-field label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+  .maxbid-field select, .maxbid-field input {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 7px;
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px;
+    padding: 6px 8px; outline: none;
+  }
+  .maxbid-field select { padding: 6px 22px 6px 8px; min-width: 180px; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888680' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center;
+  }
+  .maxbid-field select:focus, .maxbid-field input:focus { border-color: var(--accent); }
+  .maxbid-field input { padding-left: 18px; }
+  .maxbid-field .fin-input-wrap input { padding-left: 18px; }
+  .maxbid-field #maxbid-rule { padding-left: 8px; }
+  .maxbid-result {
+    display: flex; align-items: center; gap: 18px;
+    padding: 0.85rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    flex-wrap: wrap;
+  }
+  .maxbid-stat { display: flex; flex-direction: column; gap: 4px; }
+  .maxbid-stat-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+  .maxbid-stat-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+  .maxbid-stat-val.accent { color: var(--accent); }
+  .maxbid-arrow { color: var(--muted); font-size: 18px; }
+  .maxbid-formula {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+    text-align: right;
+  }
+  @media (max-width: 760px) {
+    .maxbid-card { margin-left: 1rem; margin-right: 1rem; }
+    .maxbid-formula { margin-left: 0; width: 100%; padding-top: 6px; text-align: left; }
+    .maxbid-arrow { display: none; }
+  }
   .empty {
     text-align: center; padding: 2.5rem 2rem; color: var(--muted);
     font-family: 'DM Mono', monospace; font-size: 12px;
@@ -396,6 +479,57 @@
 
 <div id="summary-area"></div>
 
+<div class="maxbid-card" id="maxbid-card">
+  <div class="maxbid-head">
+    <div class="maxbid-title">
+      <span class="maxbid-icon">⚡</span>
+      <div>
+        <div class="maxbid-name">Max Bid Calculator</div>
+        <div class="maxbid-sub">Back-solve from gross estimate, shipping &amp; rule %</div>
+      </div>
+    </div>
+    <button class="maxbid-toggle" id="maxbid-toggle" aria-label="Toggle">▾</button>
+  </div>
+  <div class="maxbid-body" id="maxbid-body">
+    <div class="maxbid-row">
+      <div class="maxbid-field">
+        <label>SOURCE</label>
+        <select id="maxbid-source">
+          <option value="manual">Manual entry</option>
+        </select>
+      </div>
+      <div class="maxbid-field">
+        <label>GROSS LOW ESTIMATE</label>
+        <div class="fin-input-wrap">
+          <input type="number" class="fin-input" id="maxbid-gross" placeholder="0" min="0" step="0.01" style="width:110px;" />
+        </div>
+      </div>
+      <div class="maxbid-field">
+        <label>EST. SHIPPING</label>
+        <div class="fin-input-wrap">
+          <input type="number" class="fin-input" id="maxbid-shipping" placeholder="0" min="0" step="0.01" style="width:100px;" />
+        </div>
+      </div>
+      <div class="maxbid-field">
+        <label>RULE %</label>
+        <input type="number" id="maxbid-rule" min="10" max="100" step="5" style="width:60px;" />
+      </div>
+    </div>
+    <div class="maxbid-result" id="maxbid-result">
+      <div class="maxbid-stat">
+        <div class="maxbid-stat-label">All-in cap</div>
+        <div class="maxbid-stat-val" id="maxbid-allincap">$0.00</div>
+      </div>
+      <div class="maxbid-arrow">→</div>
+      <div class="maxbid-stat">
+        <div class="maxbid-stat-label">Max bid (item only)</div>
+        <div class="maxbid-stat-val accent" id="maxbid-bid">$0.00</div>
+      </div>
+      <div class="maxbid-formula" id="maxbid-formula"></div>
+    </div>
+  </div>
+</div>
+
 <div class="lots-area" id="lots-area">
   <div class="empty">No lots yet. Drop photos above to create your first lot.</div>
 </div>
@@ -465,7 +599,17 @@ rulePctInput.addEventListener('change', () => {
 
 // ---------- HELPERS ----------
 const newId = (p='id') => p + '_' + Math.random().toString(36).slice(2, 9);
-function readImageFile(file) {
+
+// Anthropic API limits & resize targets:
+// - Base64-encoded image must be under ~5MB. Base64 is ~1.37x raw bytes.
+// - We target raw bytes ≤ ~3.3MB so encoded stays well under 5MB.
+// - We also cap longest side at 1568px (Claude Vision native sweet spot — anything
+//   larger gets downscaled server-side anyway, costing tokens for nothing).
+const MAX_DIMENSION = 1568;
+const TARGET_BYTES = 3_300_000; // ~3.3MB raw → ~4.5MB base64
+const JPEG_QUALITY = 0.85;
+
+function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(r.result);
@@ -473,6 +617,78 @@ function readImageFile(file) {
     r.readAsDataURL(file);
   });
 }
+
+function loadImage(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image decode failed'));
+    img.src = dataUrl;
+  });
+}
+
+function dataUrlByteSize(dataUrl) {
+  // Approximate raw byte size from base64 length
+  const b64 = dataUrl.split(',')[1] || '';
+  return Math.floor(b64.length * 0.75);
+}
+
+// Resize an image File. Returns { dataUrl, mimeType, originalBytes, finalBytes, resized }
+// Skips work entirely if the file is already small and a JPEG/PNG/WebP.
+async function processImageFile(file) {
+  const originalBytes = file.size;
+
+  // Fast path: small enough, no resize needed
+  if (originalBytes <= TARGET_BYTES && file.type.match(/^image\/(jpeg|png|webp)$/)) {
+    const dataUrl = await readFileAsDataUrl(file);
+    return { dataUrl, mimeType: file.type, originalBytes, finalBytes: originalBytes, resized: false };
+  }
+
+  // Decode the image
+  const rawDataUrl = await readFileAsDataUrl(file);
+  const img = await loadImage(rawDataUrl);
+
+  // Compute scaled dimensions — cap longest side at MAX_DIMENSION
+  let { naturalWidth: w, naturalHeight: h } = img;
+  if (Math.max(w, h) > MAX_DIMENSION) {
+    const scale = MAX_DIMENSION / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+
+  // Draw to canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // Encode as JPEG, dropping quality if still too big
+  let quality = JPEG_QUALITY;
+  let outDataUrl = canvas.toDataURL('image/jpeg', quality);
+  let bytes = dataUrlByteSize(outDataUrl);
+
+  // If still over target, step down quality (rare for 1568px JPEGs)
+  while (bytes > TARGET_BYTES && quality > 0.4) {
+    quality -= 0.1;
+    outDataUrl = canvas.toDataURL('image/jpeg', quality);
+    bytes = dataUrlByteSize(outDataUrl);
+  }
+
+  return {
+    dataUrl: outDataUrl,
+    mimeType: 'image/jpeg',
+    originalBytes,
+    finalBytes: bytes,
+    resized: true
+  };
+}
+
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
+  return (n / 1024 / 1024).toFixed(1) + ' MB';
+}
+
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -494,9 +710,18 @@ fileInput.addEventListener('change', e => {
 async function handleNewLotFiles(fileList) {
   const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
   if (arr.length === 0) return;
-  const photos = await Promise.all(arr.map(async f => ({
-    id: newId('p'), file: f, dataUrl: await readImageFile(f)
-  })));
+  const photos = await Promise.all(arr.map(async f => {
+    const processed = await processImageFile(f);
+    return {
+      id: newId('p'),
+      file: f,
+      dataUrl: processed.dataUrl,
+      mimeType: processed.mimeType,
+      originalBytes: processed.originalBytes,
+      finalBytes: processed.finalBytes,
+      resized: processed.resized
+    };
+  }));
   state.lots.push({
     id: newId('lot'),
     photos,
@@ -518,9 +743,18 @@ async function addPhotosToLot(lotId, fileList) {
   if (!lot) return;
   const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
   if (arr.length === 0) return;
-  const newPhotos = await Promise.all(arr.map(async f => ({
-    id: newId('p'), file: f, dataUrl: await readImageFile(f)
-  })));
+  const newPhotos = await Promise.all(arr.map(async f => {
+    const processed = await processImageFile(f);
+    return {
+      id: newId('p'),
+      file: f,
+      dataUrl: processed.dataUrl,
+      mimeType: processed.mimeType,
+      originalBytes: processed.originalBytes,
+      finalBytes: processed.finalBytes,
+      resized: processed.resized
+    };
+  }));
   lot.photos.push(...newPhotos);
   if (lot.status === 'done' || lot.status === 'error') {
     lot.status = 'pending'; lot.result = null;
@@ -588,6 +822,11 @@ function renderLots() {
       if (body) body.classList.toggle('hidden');
     });
   });
+
+  // Notify Max Bid calculator that the lot list changed
+  if (typeof window.refreshMaxBidSourceOptions === 'function') {
+    window.refreshMaxBidSourceOptions();
+  }
 }
 
 function renderLotCard(lot, idx) {
@@ -595,8 +834,9 @@ function renderLotCard(lot, idx) {
   const allIn = (lot.cost || 0) + (lot.shipping || 0);
 
   const photosHtml = lot.photos.map(p => `
-    <div class="photo-thumb">
+    <div class="photo-thumb" title="${escapeHtml(p.file.name)}${p.resized ? ' · resized from ' + fmtBytes(p.originalBytes) + ' to ' + fmtBytes(p.finalBytes) : ' · ' + fmtBytes(p.finalBytes)}">
       <img src="${p.dataUrl}" />
+      ${p.resized ? `<span class="resized-badge">${fmtBytes(p.finalBytes)}</span>` : ''}
       <button class="remove" data-action="remove-photo" data-lot-id="${lot.id}" data-photo-id="${p.id}" title="Remove photo">×</button>
     </div>
   `).join('');
@@ -740,7 +980,7 @@ async function analyzeLot(lot) {
   lot.photos.forEach(p => {
     content.push({
       type: 'image',
-      source: { type: 'base64', media_type: p.file.type, data: p.dataUrl.split(',')[1] }
+      source: { type: 'base64', media_type: p.mimeType || p.file.type, data: p.dataUrl.split(',')[1] }
     });
   });
   content.push({ type: 'text', text: buildPrompt(state.mode, lot) });
@@ -923,6 +1163,88 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('SW registration failed:', err));
   });
 }
+
+// ---------- MAX BID CALCULATOR ----------
+const maxbidCard = $('maxbid-card');
+const maxbidToggle = $('maxbid-toggle');
+const maxbidSource = $('maxbid-source');
+const maxbidGross = $('maxbid-gross');
+const maxbidShipping = $('maxbid-shipping');
+const maxbidRule = $('maxbid-rule');
+const maxbidAllInCap = $('maxbid-allincap');
+const maxbidBid = $('maxbid-bid');
+const maxbidFormula = $('maxbid-formula');
+
+// Restore collapsed state + last-used values
+const maxbidCollapsed = localStorage.getItem('bp_maxbid_collapsed') === '1';
+if (maxbidCollapsed) maxbidCard.classList.add('collapsed');
+maxbidShipping.value = localStorage.getItem('bp_maxbid_shipping') || '';
+maxbidRule.value = localStorage.getItem('bp_maxbid_rule') || state.rulePct;
+
+maxbidToggle.addEventListener('click', () => {
+  maxbidCard.classList.toggle('collapsed');
+  localStorage.setItem('bp_maxbid_collapsed', maxbidCard.classList.contains('collapsed') ? '1' : '0');
+});
+
+function refreshMaxBidSourceOptions() {
+  const prev = maxbidSource.value;
+  const done = state.lots.filter(l => l.status === 'done' && l.result && !l.result.error);
+  maxbidSource.innerHTML = `<option value="manual">Manual entry</option>` +
+    done.map((l, i) => {
+      const idx = state.lots.indexOf(l) + 1;
+      const title = (l.result.title || 'Untitled').slice(0, 40);
+      return `<option value="lot:${l.id}">Lot ${idx} — ${escapeHtml(title)} ($${l.result.total_low})</option>`;
+    }).join('');
+  // Try to keep the prior selection
+  if (Array.from(maxbidSource.options).some(o => o.value === prev)) {
+    maxbidSource.value = prev;
+  }
+}
+
+function recalcMaxBid() {
+  const gross = parseFloat(maxbidGross.value) || 0;
+  const ship = parseFloat(maxbidShipping.value) || 0;
+  const rulePct = Math.max(10, Math.min(100, parseInt(maxbidRule.value) || 50));
+  maxbidRule.value = rulePct;
+
+  const allInCap = gross * (rulePct / 100);
+  const maxBid = Math.max(0, allInCap - ship);
+
+  maxbidAllInCap.textContent = '$' + allInCap.toFixed(2);
+  maxbidBid.textContent = '$' + maxBid.toFixed(2);
+  maxbidFormula.textContent = gross > 0
+    ? `${rulePct}% × $${gross.toFixed(2)} = $${allInCap.toFixed(2)} − $${ship.toFixed(2)} ship`
+    : '';
+
+  localStorage.setItem('bp_maxbid_shipping', String(ship));
+  localStorage.setItem('bp_maxbid_rule', String(rulePct));
+}
+
+maxbidSource.addEventListener('change', () => {
+  const val = maxbidSource.value;
+  if (val.startsWith('lot:')) {
+    const lotId = val.slice(4);
+    const lot = state.lots.find(l => l.id === lotId);
+    if (lot && lot.result) {
+      maxbidGross.value = lot.result.total_low || '';
+      // If this lot already has shipping, use it; otherwise leave whatever the user typed
+      if (lot.shipping) maxbidShipping.value = lot.shipping;
+    }
+  }
+  recalcMaxBid();
+});
+
+[maxbidGross, maxbidShipping, maxbidRule].forEach(el => {
+  el.addEventListener('input', recalcMaxBid);
+});
+
+// Refresh source dropdown whenever lots change.
+// `renderLots` calls window.refreshMaxBidSourceOptions if defined — see renderLots.
+window.refreshMaxBidSourceOptions = refreshMaxBidSourceOptions;
+
+// Initial state
+refreshMaxBidSourceOptions();
+recalcMaxBid();
 </script>
 </body>
 </html>
