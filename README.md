@@ -2,7 +2,7 @@
 
 A browser-based LEGO minifigure lot appraiser, powered by the Anthropic Claude API. Drop in lot photos, get back per-figure identification, tier classification, condition flags, value ranges, and a buy/pass recommendation against a configurable cost rule.
 
-Built as a PWA — installs to iPhone home screen and Mac dock like a native app. Runs entirely in the browser; no backend, no server-side state, API key lives in `localStorage` per device.
+Built as a PWA — installs to home screen and dock like a native app. Runs entirely in the browser; no backend, no server-side state, API key lives in `localStorage` per device.
 
 ![BrickPulse Valuator](icon-512.png)
 
