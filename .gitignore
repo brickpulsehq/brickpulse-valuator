@@ -1,0 +1,30 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs / temp
+*.log
+.tmp/
+tmp/
+
+# Secrets — never commit anything that could contain a key
+.env
+.env.local
+*.key
+secrets.json
+
+# Node (in case you add a build step later)
+node_modules/
+dist/
+build/
+
+# Python (in case you script anything)
+__pycache__/
+*.pyc
+.venv/
+venv/
